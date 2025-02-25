@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1 class="text-center mb-4">Gestión de Canchas</h1>
+
+    <div class="card p-4 mb-4 shadow">
+        <form method="POST" action="{{ url_for('gestionar_canchas') }}">
+            <div class="row g-3"> 
+                <div class="col-md-6 col-lg-4">
+                    <label for="nombre_cancha" class="form-label">Nombre de la Cancha:</label>
+                    <input type="text" name="nombre_cancha" class="form-control" required>
+                </div>
+
+                <div class="col-md-6 col-lg-4">
+                    <label for="tipo_cancha" class="form-label">Tipo de Cancha:</label>
+                    <select name="tipo_cancha" class="form-select" required>
+                        <option value="Sintética">Sintética</option>
+                        <option value="Césped">Natural</option>
+                    </select>
+                </div>
+
+                <div class="col-md-6 col-lg-3">
+                    <label for="jugadores" class="form-label">Cantidad de Jugadores:</label>
+                    <select name="jugadores" class="form-select" required>
+                        <option value="5">5 vs 5</option>
+                        <option value="7">7 vs 7</option>
+                        <option value="9">9 vs 9</option>
+                        <option value="11">11 vs 11</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-plus"></i> Añadir
+                </button>    
+            </div>
+        </form>
+    </div>
+</div>
+
+
+    <div class="table-responsive">
+        <table class="table table-striped text-center align-middle">
+            <thead class="table-dark">
+                <tr>
+                <!--<th>ID</th> -->
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Jugadores</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cancha in canchas %}
+                <tr>
+                <!--<td>{{ cancha.CanchaID }}</td> -->
+                    <td>{{ cancha.NombreCancha }}</td>
+                    <td>{{ cancha.Tipo }}</td>
+                    <td>{{ cancha.Jugadores }}</td>
+                    <td>
+                        <a href="{{ url_for('editar_cancha', id=cancha.CanchaID) }}" class="btn btn-warning">Editar</a>
+                        <form method="POST" action="{{ url_for('eliminar_cancha', id=cancha.CanchaID) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar cancha?')">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="text-center mt-3">
+    <a href="{{ url_for('admin_index') }}" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Volver al Panel
+    </a>
+</div>
+
+{% endblock %}

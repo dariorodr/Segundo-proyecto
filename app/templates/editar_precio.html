@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">✏️ Editar Precio</h2>
+
+        <form method="POST">
+            <div class="mb-3">
+                <label for="cancha_id" class="form-label">Cancha:</label>
+                <select name="cancha_id" class="form-select" required>
+                    {% for cancha in canchas %}
+                    <option value="{{ cancha.CanchaID }}" {% if cancha.CanchaID == precio.CanchaID %}selected{% endif %}>
+                        {{ cancha.NombreCancha }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="tipo_precio" class="form-label">Tipo de Precio:</label>
+                <select name="tipo_precio" class="form-select" required>
+                    <option value="SinLuz" {% if precio.TipoPrecio == "SinLuz" %}selected{% endif %}>Sin Luz</option>
+                    <option value="ConLuz" {% if precio.TipoPrecio == "ConLuz" %}selected{% endif %}>Con Luz</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="precio" class="form-label">Precio ($):</label>
+                <input type="number" step="0.01" name="precio" value="{{ precio.Precio }}" class="form-control" required>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">
+                <i class="fas fa-save"></i> Actualizar Precio
+            </button>
+        </form>
+
+        <a href="{{ url_for('configurar_precios') }}" class="btn btn-secondary mt-3 w-100">
+            <i class="fas fa-arrow-left"></i> Volver
+        </a>
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+{% endblock %}

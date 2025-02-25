@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">✏️ Editar Turno</h2>
+        <form method="POST">
+            <div class="row">
+                <!-- Día -->
+                <div class="col-md-6 mb-3">
+                    <label for="dia" class="form-label fw-bold">📅 Día:</label>
+                    <input type="date" name="dia" id="dia" class="form-control" value="{{ turno.Dia }}" required>
+                </div>
+
+                <!-- Hora de Turno -->
+                <div class="col-md-6 mb-3">
+                    <label for="hora_de_turno" class="form-label fw-bold">⏰ Hora de Turno:</label>
+                    <input type="time" name="hora_de_turno" id="hora_de_turno" class="form-control" value="{{ turno.HoraDeTurno }}">
+                </div>
+
+                <!-- Cliente -->
+                <div class="col-md-6 mb-3">
+                    <label for="cliente" class="form-label fw-bold">🙍‍♂️ Cliente:</label>
+                    <input type="text" name="cliente" id="cliente" class="form-control" value="{{ turno.Cliente }}">
+                </div>
+
+                <!-- Cancha -->
+                <div class="col-md-6 mb-3">
+                    <label for="cancha_id" class="form-label fw-bold">⚽ Cancha:</label>
+                    <select name="cancha_id" id="cancha_id" class="form-select" required>
+                        <option value="" disabled>Seleccionar Cancha</option>
+                        {% for cancha in canchas %}
+                        <option value="{{ cancha.CanchaID }}" {% if cancha.CanchaID == turno.CanchaID %}selected{% endif %}>
+                            {{ cancha.CanchaID }} ({{ cancha.Jugadores }}) ({{ cancha.Tipo }})
+                        </option>
+                        {% endfor %}
+                    </select>            
+                </div>
+
+                <!-- Horas Solicitadas -->
+                <div class="col-md-6 mb-3">
+                    <label for="horas_solicitadas" class="form-label fw-bold">⏳ Horas Solicitadas:</label>
+                    <input type="number" name="horas_solicitadas" id="horas_solicitadas" class="form-control" value="{{ turno.HorasSolicitadas }}">
+                </div>
+
+                <!-- Día de Reserva -->
+                <div class="col-md-6 mb-3">
+                    <label for="dia_de_reserva" class="form-label fw-bold">📆 Día de Reserva:</label>
+                    <input type="date" name="dia_de_reserva" id="dia_de_reserva" class="form-control" value="{{ turno.DiaDeReserva }}">
+                </div>
+
+                <!-- Hora de Reserva -->
+                <div class="col-md-6 mb-3">
+                    <label for="hora_de_reserva" class="form-label fw-bold">🕒 Hora de Reserva:</label>
+                    <input type="time" name="hora_de_reserva" id="hora_de_reserva" class="form-control" value="{{ turno.HoraDeReserva }}">
+                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="d-flex justify-content-center gap-3 mt-3">
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fas fa-save"></i> Guardar Cambios
+                </button>
+                <a href="{{ url_for('turnos') }}" class="btn btn-secondary px-4">
+                    <i class="fas fa-times"></i> Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Iconos FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+
+{% endblock %}

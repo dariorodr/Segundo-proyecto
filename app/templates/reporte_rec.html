@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">💰 Reporte de Recaudación</h2>
+        <div class="alert alert-success text-center">
+            <h3>Total Recaudado: <strong>${{ total_recaudado if total_recaudado else 0 }}</strong></h3>
+        </div>
+        <div class="text-center">
+            <a href="{{ url_for('turnos') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver a Turnos
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

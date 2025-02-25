@@ -1,0 +1,198 @@
+{% extends "base.html" %} {% block content %}
+<div class="container mt-4">
+  <div class="card shadow-lg p-4">
+    <h1 class="text-center mb-4">📋 Turnos Reservados</h1>
+
+    <!-- Contenedor de filtros -->
+    <div class="card p-3 mb-3">
+      <form method="GET" action="{{ url_for('turnos') }}" class="row g-3">
+        <!-- Filtro por Cancha -->
+        <div class="col-12 col-md-3">
+          <label for="cancha_id" class="form-label">Filtrar por Cancha:</label>
+          <input
+            type="number"
+            name="cancha_id"
+            id="cancha_id"
+            class="form-control"
+            placeholder="Ej: 1"
+            value="{{ request.args.get('cancha_id', '') }}"
+          />
+        </div>
+
+        <!-- Filtro por Cliente -->
+        <div class="col-12 col-md-3">
+          <label for="cliente" class="form-label">Filtrar por Cliente:</label>
+          <input
+            type="text"
+            name="cliente"
+            id="cliente"
+            class="form-control"
+            placeholder="Nombre del cliente"
+            value="{{ request.args.get('cliente', '') }}"
+          />
+        </div>
+
+        <!-- Filtro Desde (Fecha de inicio) -->
+        <div class="col-12 col-md-3">
+          <label for="fecha_desde" class="form-label">Reservado Desde:</label>
+          <input
+            type="date"
+            name="fecha_desde"
+            id="fecha_desde"
+            class="form-control"
+            value="{{ request.args.get('fecha_desde', '') }}"
+          />
+        </div>
+
+        <!-- Filtro Hasta (Fecha de fin) -->
+        <div class="col-12 col-md-3">
+          <label for="fecha_hasta" class="form-label">Hasta:</label>
+          <input
+            type="date"
+            name="fecha_hasta"
+            id="fecha_hasta"
+            class="form-control"
+            value="{{ request.args.get('fecha_hasta', '') }}"
+          />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label for="cancha_id" class="form-label">Filtrar por Hora:</label>
+          <input
+            type="time"
+            name="hora"
+            id="hora"
+            class="form-control"
+            placeholder=""
+            value="{{ request.args.get('hora', '') }}"
+          />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label for="tipoCesped" class="form-label">Tipo de césped:</label>
+          <select name="tipoCesped" id="tipoCesped" class="form-select">
+              <option value="" disabled selected>Selecciona un tipo</option>           
+              <option value="Natural" {% if request.args.get('tipoCesped') == "Natural" %}selected{% endif %}>Natural</option>
+              <option value="Sintética" {% if request.args.get('tipoCesped') == "Sintética" %}selected{% endif %}>Sintética</option>
+          </select>
+        </div>
+      
+      
+
+        <div class="col-12 col-md-3">
+          <label for="cancha_id" class="form-label">Filtrar por Duración:</label>
+          <input
+            type="number"
+            name="duracion"
+            id="duracion"
+            class="form-control"
+            placeholder="En horas"
+            value="{{ request.args.get('duracion', '') }}"
+          />
+        </div>
+
+        <div class="col-12 col-md-3">
+          <label for="cancha_id" class="form-label">Capacidad:</label>
+          <input
+            type="text"
+            name="capacidad"
+            id="capacidad"
+            class="form-control"
+            placeholder="5 vs 5 o 7 vs 7"
+            value="{{ request.args.get('capacidad', '') }}"
+          />
+        </div>        
+
+
+        <!-- Botones de búsqueda y limpiar filtros -->
+        <div class="row mt-3 d-flex justify-content-center">
+          <div class="col-6 col-md-4">
+            <button type="submit" class="btn btn-primary w-100">
+              <i class="fas fa-search"></i> Buscar
+            </button>
+          </div>
+          <div class="col-6 col-md-4">
+            <a href="{{ url_for('turnos') }}" class="btn btn-secondary w-100">
+              <i class="fas fa-times"></i> Limpiar
+            </a>
+          </div>
+        </div>
+        
+
+    <!-- Tabla de turnos -->
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead class="table-dark text-center">
+          <tr>
+        <!--<th>ID</th> -->
+            <th>Día</th>
+            <th>Hora</th>
+            <th>Cliente</th>
+            <th>Cancha</th>
+            <th>Tipo Césped</th>
+            <th>Capacidad</th>
+            <th>Duración</th>
+            <th>Reservado el</th>
+            <th>Hora de Reserva</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for turno in turnos %}
+          <tr class="text-center">
+        <!--<td>{{ turno[0] }}</td> -->
+            <td>{{ turno[1] }}</td> <!-- Dia -->
+            <td>{{ turno[2] }}</td> <!-- HoraDeTurno -->
+            <td>{{ turno[3] }}</td> <!-- Cliente -->
+            <td>{{ turno[4] }}</td> <!-- CanchaID -->
+            <td>{{ turno[8] }}</td> <!-- Tipo de Cancha -->
+            <td>{{ turno[9] }}</td> <!-- HorasSolicitadas -->
+            <td>{{ turno[5] }}</td> <!-- DiaDeReserva -->
+            <td>{{ turno[6] }}</td> <!-- HoraDeReserva -->
+            <td>{{ turno[7] }}</td> <!-- HoraDeReserva -->
+
+            <td>
+              <a href="{{ url_for('editar_turno', turno_id=turno.TurnoID) }}" class="btn btn-warning btn-sm">
+                  <i class="fas fa-edit"></i> Editar
+              </a>
+            
+            
+            <form action="{{ url_for('eliminar_turno', turno_id=turno.TurnoID ) }}" method="POST" style="display:inline;">
+              <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Eliminar este turno?')">
+                  <i class="fas fa-trash"></i> Eliminar
+              </button>
+            </form>
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+        
+      </table>
+    </div>
+
+    <div class="text-center mt-3">
+      <a href="{{ url_for('reporte') }}" class="btn btn-primary">
+          <i class="fas fa-chart-line"></i> Ver Recaudación
+      </a>
+    </div>
+
+    <!-- Botón de volver -->
+    <div class="text-center mt-3">
+      <a href="{{ url_for('admin_index') }}" class="btn btn-primary">
+        <i class="fas fa-arrow-left"></i> Volver al Panel
+      </a>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+<!-- Iconos FontAwesome -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+/>
+{% endblock %}
