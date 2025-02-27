@@ -1,6 +1,36 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<!-- Formulario de filtros -->
+<form method="GET" action="{{ url_for('reporte_recaudacion') }}" class="row g-3">
+    <div class="col-12 col-md-3">
+        <label for="cancha_id" class="form-label">Filtrar por Cancha:</label>
+        <input
+            type="number"
+            name="cancha_id"
+            id="cancha_id"
+            class="form-control"
+            placeholder="Ej: 1"
+            value="{{ request.args.get('cancha_id', '') }}">
+    </div>
+
+    <div class="col-12 col-md-3">
+        <label for="tipo_cesped" class="form-label">Filtrar por Tipo de Césped:</label>
+        <input
+            type="text"
+            name="tipo_cesped"
+            id="tipo_cesped"
+            class="form-control"
+            placeholder="Ej: Sintético"
+            value="{{ request.args.get('tipo_cesped', '') }}">
+    </div>
+
+    <div class="col-12 col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+    </div>
+</form>
+
 <div class="container mt-4">
     <div class="card shadow-lg p-4">
         <h2 class="text-center mb-4">💰 Reporte de Recaudación</h2>

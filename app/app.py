@@ -270,6 +270,39 @@ def reporte():
 
     return render_template('reporte_rec.html', total_recaudado=total_recaudado)
 
+# Ruta para la recaudación
+@app.route("/reporte")
+def reporte_recaudacion():
+    cancha_id = request.args.get("cancha_id", type=int)
+    tipo_cesped = request.args.get("tipo_cesped", type=str)
+
+    # Consulta base
+    query = (
+        db.session.query(
+            Cancha.NombreCancha.label("NombreCancha"),
+            Cancha.Tipo,
+            func.sum(Precio.Precio).label("total_recaudado")
+        )
+        .join(Precio, Precio.CanchaID == Cancha.CanchaID)
+        .join(Turno, Turno.CanchaID == Cancha.CanchaID)
+        .group_by(Cancha.CanchaID)
+    )
+
+    # Aplicar filtros si el usuario los usa
+    if cancha_id:
+        query = query.filter(Cancha.CanchaID == cancha_id)
+
+    if tipo_cesped:
+        query = query.filter(Cancha.Tipo.ilike(f"%{tipo_cesped}%"))  # Filtra ignorando mayúsculas/minúsculas
+
+    # Ejecutar consulta
+    resultado = query.first()
+
+    # Si hay resultados, extraer el total recaudado; si no, asignar 0
+    total_recaudado = resultado.total_recaudado if resultado else 0
+
+    return render_template("reporte_rec.html", total_recaudado=total_recaudado)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
