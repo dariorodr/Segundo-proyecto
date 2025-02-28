@@ -265,10 +265,10 @@ def eliminar_precio(precio_id):
 @app.route('/reporte/')
 def reporte():
     total_recaudado = db.session.query(
-        func.sum(Turno.HorasSolicitadas * Precio.TipoPrecio)
+        func.sum(Turno.HorasSolicitadas * Precio.Precio)
     ).join(Precio, Turno.CanchaID == Precio.CanchaID).scalar()
 
-    return render_template('reporte_rec.html', total_recaudado=total_recaudado)
+    return render_template("reporte_rec.html", total_recaudado=total_recaudado)
 
 # Ruta para la recaudación
 @app.route("/reporte")
@@ -276,33 +276,32 @@ def reporte_recaudacion():
     cancha_id = request.args.get("cancha_id", type=int)
     tipo_cesped = request.args.get("tipo_cesped", type=str)
 
-    # Consulta base
-    query = (
-        db.session.query(
-            Cancha.NombreCancha.label("NombreCancha"),
-            Cancha.Tipo,
-            func.sum(Precio.Precio).label("total_recaudado")
-        )
-        .join(Precio, Precio.CanchaID == Cancha.CanchaID)
-        .join(Turno, Turno.CanchaID == Cancha.CanchaID)
-        .group_by(Cancha.CanchaID)
-    )
+    # Base de la consulta
+    query = db.session.query(
+        Cancha.Tipo,
+        func.sum(Precio.Precio).label("total_recaudado")
+    ).join(Precio, Precio.CanchaID == Cancha.CanchaID
+    ).join(Turno, Turno.CanchaID == Cancha.CanchaID)
 
-    # Aplicar filtros si el usuario los usa
+    # Aplicar filtros correctamente
     if cancha_id:
-        query = query.filter(Cancha.CanchaID == cancha_id)
-
-    if tipo_cesped:
-        query = query.filter(Cancha.Tipo.ilike(f"%{tipo_cesped}%"))  # Filtra ignorando mayúsculas/minúsculas
+        query = query.add_columns(Cancha.NombreCancha).filter(Cancha.CanchaID == cancha_id).group_by(Cancha.CanchaID)
+    elif tipo_cesped:
+        query = query.filter(Cancha.Tipo == tipo_cesped).group_by(Cancha.Tipo)
+    else:
+        # Si no hay filtros, calcular la suma total de todas las canchas
+        total_recaudado = db.session.query(func.sum(Precio.Precio)).scalar() or 0
+        return render_template("reporte_rec.html", total_recaudado=total_recaudado)
 
     # Ejecutar consulta
-    resultado = query.first()
+    resultados = query.all()
 
-    # Si hay resultados, extraer el total recaudado; si no, asignar 0
-    total_recaudado = resultado.total_recaudado if resultado else 0
+    total_recaudado = {
+        (resultado.NombreCancha if cancha_id else resultado.Tipo): resultado.total_recaudado
+        for resultado in resultados
+    } if resultados else {}
 
     return render_template("reporte_rec.html", total_recaudado=total_recaudado)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
