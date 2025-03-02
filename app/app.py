@@ -262,14 +262,6 @@ def eliminar_precio(precio_id):
     flash("Precio eliminado correctamente", "success")
     return redirect(url_for('configurar_precios'))
 
-@app.route('/reporte/')
-def reporte():
-    total_recaudado = db.session.query(
-        func.sum(Turno.HorasSolicitadas * Precio.Precio)
-    ).join(Precio, Turno.CanchaID == Precio.CanchaID).scalar()
-
-    return render_template("reporte_rec.html", total_recaudado=total_recaudado)
-
 # Ruta para la recaudación
 @app.route("/reporte")
 def reporte_recaudacion():
@@ -278,7 +270,6 @@ def reporte_recaudacion():
 
     # Base de la consulta
     query = db.session.query(
-        Cancha.Tipo,
         func.sum(Precio.Precio).label("total_recaudado")
     ).join(Precio, Precio.CanchaID == Cancha.CanchaID
     ).join(Turno, Turno.CanchaID == Cancha.CanchaID)
@@ -287,21 +278,28 @@ def reporte_recaudacion():
     if cancha_id:
         query = query.add_columns(Cancha.NombreCancha).filter(Cancha.CanchaID == cancha_id).group_by(Cancha.CanchaID)
     elif tipo_cesped:
-        query = query.filter(Cancha.Tipo == tipo_cesped).group_by(Cancha.Tipo)
+        query = query.add_columns(Cancha.Tipo).filter(Cancha.Tipo == tipo_cesped).group_by(Cancha.Tipo)
     else:
-        # Si no hay filtros, calcular la suma total de todas las canchas
-        total_recaudado = db.session.query(func.sum(Precio.Precio)).scalar() or 0
-        return render_template("reporte_rec.html", total_recaudado=total_recaudado)
+        query = query.add_columns(Cancha.Tipo).group_by(Cancha.Tipo)  # Agrupar por tipo cuando no hay filtros específicos
 
     # Ejecutar consulta
     resultados = query.all()
 
+    # Si no hay filtros, calcular la suma total correctamente
+    if not cancha_id and not tipo_cesped:
+        total_recaudado_general = sum(resultado.total_recaudado for resultado in resultados) if resultados else 0
+        return render_template("reporte_rec.html", total_recaudado={"Total": total_recaudado_general})
+
+    # Procesar resultados en un diccionario
     total_recaudado = {
-        (resultado.NombreCancha if cancha_id else resultado.Tipo): resultado.total_recaudado
+        resultado.NombreCancha if cancha_id else resultado.Tipo: resultado.total_recaudado
         for resultado in resultados
     } if resultados else {}
 
     return render_template("reporte_rec.html", total_recaudado=total_recaudado)
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
