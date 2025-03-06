@@ -18,7 +18,7 @@
     <div class="col-12 col-md-3">
         <label for="tipoCesped" class="form-label">Tipo de césped:</label>
         <select name="tipo_cesped" id="tipoCesped" class="form-select">
-            <option value="" disabled selected>Selecciona un tipo</option>           
+            <option value="" {% if not request.args.get('tipo_cesped') %}selected{% endif %}>Todos</option>           
             <option value="Natural" {% if request.args.get('tipo_cesped') == "Natural" %}selected{% endif %}>Natural</option>
             <option value="Sintético" {% if request.args.get('tipo_cesped') == "Sintético" %}selected{% endif %}>Sintético</option>
         </select>
@@ -56,12 +56,15 @@
         <h2 class="text-center mb-4">💰 Reporte de Recaudación</h2>
         <div class="alert alert-success text-center">
             <h3>Total Recaudado: <strong>
+                {% if request.args.get('desde') and request.args.get('hasta') %}
+                    ({{ request.args.get('desde') }} al {{ request.args.get('hasta') }})<br>
+                {% endif %}
                 {% if total_recaudado is mapping %}
                     {% for tipo, total in total_recaudado.items() %}
-                        {{ tipo }}: ${{ total }} <br>
+                        {{ tipo }}: ${{ total|float|round(2) }} <br>
                     {% endfor %}
                 {% else %}
-                    ${{ total_recaudado }}
+                    ${{ total_recaudado|float|round(2) }}
                 {% endif %}
             </strong></h3>
         </div>
@@ -74,4 +77,3 @@
 </div>
 
 {% endblock %}
-

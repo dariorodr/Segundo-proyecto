@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy import func, cast, Date
+from sqlalchemy import func, cast, Date, and_
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:sarandeameelcabezudo@localhost/proyecto_cancha_2'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -263,41 +263,48 @@ def eliminar_precio(precio_id):
     return redirect(url_for('configurar_precios'))
 
 
+
 @app.route("/reporte")
 def reporte_recaudacion():
     cancha_id = request.args.get("cancha_id", type=int)
     tipo_cesped = request.args.get("tipo_cesped", type=str)
-    desde_str = request.args.get("desde")
-    hasta_str = request.args.get("hasta")
-
-    # Convertir fechas si existen
-    desde = datetime.strptime(desde_str, "%Y-%m-%d") if desde_str else None
-    hasta = datetime.strptime(hasta_str, "%Y-%m-%d") if hasta_str else None
+    desde_str = request.args.get("desde", type=str)
+    hasta_str = request.args.get("hasta", type=str)
 
     # Base de la consulta
     query = db.session.query(
-        func.sum(Precio.Precio).label("total_recaudado")
-    ).join(Precio, Precio.CanchaID == Cancha.CanchaID
-    ).join(Turno, Turno.CanchaID == Cancha.CanchaID)
+        func.sum(Precio.Precio * Turno.HorasSolicitadas).label("total_recaudado")
+    ).select_from(Turno).join(
+        Cancha, Turno.CanchaID == Cancha.CanchaID
+    ).join(
+        Precio, Precio.CanchaID == Turno.CanchaID
+    )
 
-    # Aplicar filtros
-    if desde:
-        query = query.filter(Turno.Dia >= desde)
-    if hasta:
-        query = query.filter(Turno.Dia <= hasta)
+    # Aplicar filtro de fecha si existe
+    if desde_str and hasta_str:
+        try:
+            desde = datetime.strptime(desde_str, '%Y-%m-%d').date()
+            hasta = datetime.strptime(hasta_str, '%Y-%m-%d').date()
+            query = query.filter(Turno.DiaDeReserva.between(desde, hasta))
+            print(f"Filtro aplicado: Desde {desde} hasta {hasta}")
+        except ValueError:
+            print("Error: Formato de fecha incorrecto")
+
+    # Aplicar otros filtros
     if cancha_id:
         query = query.add_columns(Cancha.NombreCancha).filter(Cancha.CanchaID == cancha_id).group_by(Cancha.CanchaID)
     elif tipo_cesped:
         query = query.add_columns(Cancha.Tipo).filter(Cancha.Tipo == tipo_cesped).group_by(Cancha.Tipo)
-    else:
-        query = query.add_columns(Cancha.Tipo).group_by(Cancha.Tipo)
 
     # Ejecutar consulta
     resultados = query.all()
+    print("Resultados obtenidos:", resultados)
 
     # Si no hay filtros, calcular la suma total correctamente
     if not cancha_id and not tipo_cesped:
-        total_recaudado_general = sum(resultado.total_recaudado for resultado in resultados) if resultados else 0
+        total_recaudado_general = db.session.query(
+            func.sum(Precio.Precio * Turno.HorasSolicitadas).label("total_recaudado")
+        ).select_from(Turno).join(Cancha, Turno.CanchaID == Cancha.CanchaID).join(Precio, Precio.CanchaID == Cancha.CanchaID).scalar() or 0
         return render_template("reporte_rec.html", total_recaudado={"Total": total_recaudado_general})
 
     # Procesar resultados en un diccionario
@@ -307,6 +314,7 @@ def reporte_recaudacion():
     } if resultados else {}
 
     return render_template("reporte_rec.html", total_recaudado=total_recaudado)
+
 
 
 
