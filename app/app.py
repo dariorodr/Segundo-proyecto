@@ -280,7 +280,7 @@ def reporte_recaudacion():
         Precio, Precio.CanchaID == Turno.CanchaID
     )
 
-    # Aplicar filtro de fecha si existe
+    # Aplicar filtro de fecha si existe (siempre, antes de otros filtros)
     if desde_str and hasta_str:
         try:
             desde = datetime.strptime(desde_str, '%Y-%m-%d').date()
@@ -300,12 +300,10 @@ def reporte_recaudacion():
     resultados = query.all()
     print("Resultados obtenidos:", resultados)
 
-    # Si no hay filtros, calcular la suma total correctamente
+    # Si no hay filtros de cancha ni tipo, usar el resultado de la consulta con fechas
     if not cancha_id and not tipo_cesped:
-        total_recaudado_general = db.session.query(
-            func.sum(Precio.Precio * Turno.HorasSolicitadas).label("total_recaudado")
-        ).select_from(Turno).join(Cancha, Turno.CanchaID == Cancha.CanchaID).join(Precio, Precio.CanchaID == Cancha.CanchaID).scalar() or 0
-        return render_template("reporte_rec.html", total_recaudado={"Total": total_recaudado_general})
+        total_recaudado = resultados[0].total_recaudado if resultados else 0
+        return render_template("reporte_rec.html", total_recaudado={"Total": total_recaudado})
 
     # Procesar resultados en un diccionario
     total_recaudado = {
@@ -314,7 +312,6 @@ def reporte_recaudacion():
     } if resultados else {}
 
     return render_template("reporte_rec.html", total_recaudado=total_recaudado)
-
 
 
 
