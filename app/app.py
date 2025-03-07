@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from sqlalchemy import func, cast, Date, and_
+from sqlalchemy import func, and_, case
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:sarandeameelcabezudo@localhost/proyecto_cancha_2'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -277,10 +277,16 @@ def reporte_recaudacion():
     ).select_from(Turno).join(
         Cancha, Turno.CanchaID == Cancha.CanchaID
     ).join(
-        Precio, Precio.CanchaID == Turno.CanchaID
+        Precio, and_(
+            Precio.CanchaID == Turno.CanchaID,
+            Precio.TipoPrecio == case(
+                (Turno.HoraDeTurno >= "18:00", "ConLuz"),  # Noche: ConLuz
+                else_="SinLuz"  # Día: SinLuz
+            )
+        )
     )
 
-    # Aplicar filtro de fecha si existe (siempre, antes de otros filtros)
+    # Aplicar filtro de fecha si existe
     if desde_str and hasta_str:
         try:
             desde = datetime.strptime(desde_str, '%Y-%m-%d').date()
@@ -300,7 +306,7 @@ def reporte_recaudacion():
     resultados = query.all()
     print("Resultados obtenidos:", resultados)
 
-    # Si no hay filtros de cancha ni tipo, usar el resultado de la consulta con fechas
+    # Si no hay filtros de cancha ni tipo, usar el resultado de la consulta
     if not cancha_id and not tipo_cesped:
         total_recaudado = resultados[0].total_recaudado if resultados else 0
         return render_template("reporte_rec.html", total_recaudado={"Total": total_recaudado})

@@ -2,69 +2,92 @@
 
 {% block content %}
 
-<!-- Formulario de filtros -->
-<form method="GET" action="{{ url_for('reporte_recaudacion') }}" class="row g-3">
-    <div class="col-12 col-md-3">
-        <label for="cancha_id" class="form-label">Filtrar por Cancha:</label>
-        <input
-            type="number"
-            name="cancha_id"
-            id="cancha_id"
-            class="form-control"
-            placeholder="Ej: 1"
-            value="{{ request.args.get('cancha_id', '') }}">
-    </div>
+<!-- Formulario de filtros con estilo -->
+<div class="container mt-5">
+    <div class="card shadow-sm p-4 rounded-3">
+        <h4 class="text-center mb-4 text-muted"><i class="fas fa-filter me-2"></i>Filtros de Recaudación</h4>
+        <form method="GET" action="{{ url_for('reporte_recaudacion') }}" class="row g-3">
+            <!-- Filtrar por Cancha -->
+            <div class="col-12 col-md-3">
+                <label for="cancha_id" class="form-label fw-bold text-secondary">Cancha</label>
+                <div class="input-group">
+                    <input
+                        type="number"
+                        name="cancha_id"
+                        id="cancha_id"
+                        class="form-control rounded-end"
+                        placeholder="Ej: 1"
+                        value="{{ request.args.get('cancha_id', '') }}">
+                </div>
+            </div>
 
-    <div class="col-12 col-md-3">
-        <label for="tipoCesped" class="form-label">Tipo de césped:</label>
-        <select name="tipo_cesped" id="tipoCesped" class="form-select">
-            <option value="" {% if not request.args.get('tipo_cesped') %}selected{% endif %}>Todos</option>           
-            <option value="Natural" {% if request.args.get('tipo_cesped') == "Natural" %}selected{% endif %}>Natural</option>
-            <option value="Sintético" {% if request.args.get('tipo_cesped') == "Sintético" %}selected{% endif %}>Sintético</option>
-        </select>
-    </div>
+            <!-- Tipo de Césped -->
+            <div class="col-12 col-md-3">
+                <label for="tipoCesped" class="form-label fw-bold text-secondary">Tipo de Césped</label>
+                <div class="input-group">
+                    <select name="tipo_cesped" id="tipoCesped" class="form-select rounded-end">
+                        <option value="" {% if not request.args.get('tipo_cesped') %}selected{% endif %}>Todos</option>           
+                        <option value="Natural" {% if request.args.get('tipo_cesped') == "Natural" %}selected{% endif %}>Natural</option>
+                        <option value="Sintético" {% if request.args.get('tipo_cesped') == "Sintético" %}selected{% endif %}>Sintético</option>
+                    </select>
+                </div>
+            </div>
 
-    <!-- FILTROS DE FECHA -->
-    <div class="col-12 col-md-3">
-        <label for="desde" class="form-label">Desde:</label>
-        <input type="date" name="desde" id="desde" class="form-control" value="{{ request.args.get('desde', '') }}">
-    </div>
+            <!-- Filtro Desde -->
+            <div class="col-12 col-md-3">
+                <label for="desde" class="form-label fw-bold text-secondary">Desde</label>
+                <div class="input-group">
+                    <input
+                        type="date"
+                        name="desde"
+                        id="desde"
+                        class="form-control rounded-end"
+                        value="{{ request.args.get('desde', '') }}">
+                </div>
+            </div>
 
-    <div class="col-12 col-md-3">
-        <label for="hasta" class="form-label">Hasta:</label>
-        <input type="date" name="hasta" id="hasta" class="form-control" value="{{ request.args.get('hasta', '') }}">
-    </div>
+            <!-- Filtro Hasta -->
+            <div class="col-12 col-md-3">
+                <label for="hasta" class="form-label fw-bold text-secondary">Hasta</label>
+                <div class="input-group">
+                    <input
+                        type="date"
+                        name="hasta"
+                        id="hasta"
+                        class="form-control rounded-end"
+                        value="{{ request.args.get('hasta', '') }}">
+                </div>
+            </div>
 
-    <!-- BOTONES -->
-    <div class="row mt-3 d-flex justify-content-center">
-        <div class="col-6 col-md-4">
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="fas fa-search"></i> Filtrar
-            </button>
-        </div>
-        <div class="col-6 col-md-4">
-            <a href="{{ url_for('reporte_recaudacion') }}" class="btn btn-secondary w-100">
-                <i class="fas fa-times"></i> Limpiar
-            </a>
-        </div>
+            <!-- Botones -->
+            <div class="row mt-4 d-flex justify-content-center">
+                <div class="col-6 col-md-4">
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                        <i class="fas fa-search me-2"></i>Filtrar
+                    </button>
+                </div>
+                <div class="col-6 col-md-4">
+                    <a href="{{ url_for('reporte_recaudacion') }}" class="btn btn-secondary w-100">
+                        <i class="fas fa-times me-2"></i>Limpiar
+                    </a>
+                </div>
+            </div>
+        </form>
     </div>
-</form>
+</div>
 
-<!-- TARJETA DE RECAUDACIÓN -->
+<!-- TARJETA DE RECAUDACIÓN (sin cambios, solo para contexto) -->
 <div class="container mt-4">
     <div class="card shadow-lg p-4">
         <h2 class="text-center mb-4">💰 Reporte de Recaudación</h2>
         <div class="alert alert-success text-center">
             <h3>Total Recaudado: <strong>
-                {% if request.args.get('desde') and request.args.get('hasta') %}
-                    ({{ request.args.get('desde') }} al {{ request.args.get('hasta') }})<br>
-                {% endif %}
                 {% if total_recaudado is mapping %}
                     {% for tipo, total in total_recaudado.items() %}
-                        {{ tipo }}: ${{ total|float|round(2) }} <br>
+                        {{ tipo }}: ${{ total }} <br>
                     {% endfor %}
                 {% else %}
-                    ${{ total_recaudado|float|round(2) }}
+                    ${{ total_recaudado }}
                 {% endif %}
             </strong></h3>
         </div>
