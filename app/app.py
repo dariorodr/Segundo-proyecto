@@ -539,18 +539,25 @@ def reporte_recaudacion():
 
         if not cancha_id and not tipo_cesped:
             total_recaudado = resultados[0].total_recaudado if resultados and resultados[0].total_recaudado is not None else 0
-            # Mostrar mensaje si se aplicaron filtros y no hay datos válidos
             if filtros_aplicados and (not resultados or resultados[0].total_recaudado is None):
                 flash("No se encontraron datos de recaudación con estos parámetros.", "warning")
             return render_template("reporte_rec.html", total_recaudado={"Total": total_recaudado})
 
-        total_recaudado = {
-            resultado.NombreCancha if cancha_id else resultado.Tipo: resultado.total_recaudado
-            for resultado in resultados if resultado.total_recaudado is not None
-        } if resultados else {}
+        # Si hay filtro por cancha_id o tipo_cesped pero no hay resultados, asignar 0 explícitamente
+        total_recaudado = {}
+        if resultados:
+            total_recaudado = {
+                resultado.NombreCancha if cancha_id else resultado.Tipo: resultado.total_recaudado
+                for resultado in resultados if resultado.total_recaudado is not None
+            }
+        elif cancha_id:
+            # Si no hay resultados, buscar el nombre de la cancha para mostrar 0
+            cancha = Cancha.query.get(cancha_id)
+            total_recaudado = {cancha.NombreCancha if cancha else f"Cancha {cancha_id}": 0}
+        elif tipo_cesped:
+            total_recaudado = {tipo_cesped: 0}
 
-        # Mostrar mensaje si se aplicaron filtros y no hay datos válidos
-        if filtros_aplicados and not total_recaudado:
+        if filtros_aplicados and not any(total_recaudado.values()):
             flash("No se encontraron datos de recaudación con estos parámetros.", "warning")
 
         return render_template("reporte_rec.html", total_recaudado=total_recaudado)
@@ -563,7 +570,6 @@ def reporte_recaudacion():
         app.logger.error(f"Error inesperado en /reporte: {str(e)}")
         flash("Ocurrió un error inesperado. Por favor, intenta de nuevo.", "danger")
         return redirect(url_for('index'))
-
 if __name__ == '__main__':
     with app.app_context():
         try:
