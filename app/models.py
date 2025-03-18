@@ -1,7 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 
+# Inicializar SQLAlchemy aquí
 db = SQLAlchemy()
+
 
 class Turno(db.Model):
     __tablename__ = 'turnos'
@@ -30,10 +32,10 @@ class Cancha(db.Model):
     Jugadores = db.Column(db.Integer, nullable=True)
 
 class User(UserMixin, db.Model):
-    __tablename__ = 'user'  # Nombre explícito para evitar conflictos
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(120), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
