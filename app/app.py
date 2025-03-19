@@ -1,34 +1,71 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from datetime import datetime
 from sqlalchemy import func, and_, case
 from jinja2 import TemplateNotFound
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 import logging
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:sarandeameelcabezudo@localhost/proyecto_cancha_2'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'mi_clave_secreta_12345'  # Clave segura única
+app.config['SECRET_KEY'] = 'mi_clave_secreta_12345'
 
 # Configuración de logging
 logging.basicConfig(filename='error.log', level=logging.ERROR, 
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-from models import db, Turno, Precio, Cancha
+# Inicializar Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# Importar modelos después de inicializar db y app
+from models import db, User, Turno, Precio, Cancha
 
 db.init_app(app)
 
-# Manejadores de errores HTTP
-@app.errorhandler(404)
-def page_not_found(e):
-    app.logger.error(f"404 - Página no encontrada: {request.url}")
-    return render_template('error.html', error_code=404, error_message="Página no encontrada"), 404
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
-@app.errorhandler(500)
-def internal_server_error(e):
-    app.logger.error(f"500 - Error interno del servidor: {str(e)}")
-    return render_template('error.html', error_code=500, error_message="Error interno del servidor"), 500
+# Rutas de autenticación
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = User.query.filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('index'))
+        flash('Usuario o contraseña incorrectos', 'danger')
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        if User.query.filter_by(username=username).first():
+            flash('El usuario ya existe', 'danger')
+        else:
+            hashed_password = generate_password_hash(password)  # Cambio aquí
+            new_user = User(username=username, password=hashed_password, is_admin=True)
+            db.session.add(new_user)
+            db.session.commit()
+            flash('Registro exitoso, inicia sesión', 'success')
+            return redirect(url_for('login'))
+    return render_template('register.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Sesión cerrada correctamente', 'success')
+    return redirect(url_for('login'))
+
 
 @app.route('/')
 def index():
@@ -60,7 +97,6 @@ def turnos():
             Turno.HorasSolicitadas, Turno.DiaDeReserva, Turno.HoraDeReserva, Cancha.Tipo, Cancha.Jugadores
         ).join(Cancha, Cancha.CanchaID == Turno.CanchaID)
 
-        # Variable para detectar si se aplicó algún filtro
         filtros_aplicados = any([cancha_id, cliente, hora, tipoCesped, duracion, capacidad, fecha_desde, fecha_hasta])
 
         if cancha_id:
@@ -96,7 +132,6 @@ def turnos():
         query = query.order_by(Turno.TurnoID)
         turnos = query.all()
 
-        # Mostrar mensaje si se aplicaron filtros y no hay resultados
         if filtros_aplicados and not turnos:
             flash("No se encontraron turnos con estos parámetros.", "warning")
 
@@ -111,8 +146,13 @@ def turnos():
         flash("Ocurrió un error inesperado. Por favor, intenta de nuevo.", "danger")
         return redirect(url_for('index'))
 
+
 @app.route('/admin/')
+@login_required
 def admin_index():
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         return render_template('admin_index.html', title='Gestión Administrativa')
     except TemplateNotFound as e:
@@ -125,7 +165,11 @@ def admin_index():
         return redirect(url_for('index'))
 
 @app.route('/canchas', methods=['GET', 'POST'])
+@login_required
 def gestionar_canchas():
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if request.method == 'POST':
             try:
@@ -165,7 +209,11 @@ def gestionar_canchas():
         return redirect(url_for('admin_index'))
 
 @app.route('/editar-cancha/<int:id>', methods=['GET', 'POST'])
+@login_required
 def editar_cancha(id):
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if id <= 0:
             flash("ID de cancha inválido.", "danger")
@@ -206,7 +254,11 @@ def editar_cancha(id):
         return redirect(url_for('gestionar_canchas'))
 
 @app.route('/eliminar-cancha/<int:id>', methods=['POST'])
+@login_required
 def eliminar_cancha(id):
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if id <= 0:
             flash("ID de cancha inválido.", "danger")
@@ -290,7 +342,11 @@ def reservar_turnos_formulario():
         return redirect(url_for('index'))
 
 @app.route('/editar_turno/<int:turno_id>', methods=['GET', 'POST'])
+@login_required
 def editar_turno(turno_id):
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if turno_id <= 0:
             flash("ID de turno inválido.", "danger")
@@ -358,7 +414,11 @@ def editar_turno(turno_id):
         return redirect(url_for('turnos'))
 
 @app.route('/eliminar-turno/<int:turno_id>', methods=['POST'])
+@login_required
 def eliminar_turno(turno_id):
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if turno_id <= 0:
             flash("ID de turno inválido.", "danger")
@@ -381,7 +441,11 @@ def eliminar_turno(turno_id):
     return redirect(url_for('turnos'))
 
 @app.route('/configurar-precios/', methods=['GET', 'POST'])
+@login_required
 def configurar_precios():
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if request.method == 'POST':
             try:
@@ -422,7 +486,11 @@ def configurar_precios():
         return redirect(url_for('admin_index'))
 
 @app.route('/editar-precio/<int:precio_id>', methods=['GET', 'POST'])
+@login_required
 def editar_precio(precio_id):
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if precio_id <= 0:
             flash("ID de precio inválido.", "danger")
@@ -466,7 +534,11 @@ def editar_precio(precio_id):
         return redirect(url_for('configurar_precios'))
 
 @app.route('/eliminar-precio/<int:precio_id>', methods=['POST'])
+@login_required
 def eliminar_precio(precio_id):
+    if not current_user.is_admin:
+        flash('Acceso denegado. Solo administradores.', 'danger')
+        return redirect(url_for('login'))
     try:
         if precio_id <= 0:
             flash("ID de precio inválido.", "danger")
@@ -500,7 +572,6 @@ def reporte_recaudacion():
             flash("ID de cancha inválido.", "danger")
             return redirect(url_for('reporte_recaudacion'))
 
-        # Variable para detectar si se aplicó algún filtro
         filtros_aplicados = any([cancha_id, tipo_cesped, desde_str, hasta_str])
 
         query = db.session.query(
@@ -543,7 +614,6 @@ def reporte_recaudacion():
                 flash("No se encontraron datos de recaudación con estos parámetros.", "warning")
             return render_template("reporte_rec.html", total_recaudado={"Total": total_recaudado})
 
-        # Si hay filtro por cancha_id o tipo_cesped pero no hay resultados, asignar 0 explícitamente
         total_recaudado = {}
         if resultados:
             total_recaudado = {
@@ -551,7 +621,6 @@ def reporte_recaudacion():
                 for resultado in resultados if resultado.total_recaudado is not None
             }
         elif cancha_id:
-            # Si no hay resultados, buscar el nombre de la cancha para mostrar 0
             cancha = Cancha.query.get(cancha_id)
             total_recaudado = {cancha.NombreCancha if cancha else f"Cancha {cancha_id}": 0}
         elif tipo_cesped:
@@ -570,6 +639,7 @@ def reporte_recaudacion():
         app.logger.error(f"Error inesperado en /reporte: {str(e)}")
         flash("Ocurrió un error inesperado. Por favor, intenta de nuevo.", "danger")
         return redirect(url_for('index'))
+
 if __name__ == '__main__':
     with app.app_context():
         try:
