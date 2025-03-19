@@ -1,11 +1,14 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<h2>Bienvenido a la Gestión de Canchas</h2>
-<p>Selecciona una opción del menú para comenzar.</p>
-<a href="{{ url_for('admin_index') }}" class="btn btn-primary">Ir a Gestión Administrativa</a>
-<a href="{{ url_for('reservar_turnos_formulario') }}" class="btn btn-primary">Reservá Ahora</a>
+<div class="mt-4">
+    <h2>Bienvenido a la Gestión de Canchas</h2>
+    <p>Selecciona una opción del menú para comenzar.</p>
+    <a href="{{ url_for('admin_index') }}" class="btn btn-primary">Ir a Gestión Administrativa</a>
+    <a href="{{ url_for('reservar_turnos_formulario') }}" class="btn btn-primary">Reservá Ahora</a>
+</div>
 {% endblock %}
+
+
 
 
 

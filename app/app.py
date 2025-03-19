@@ -39,7 +39,7 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             login_user(user)
-            return redirect(url_for('admin_index'))
+            return redirect(url_for('index'))
         flash('Usuario o contraseña incorrectos', 'danger')
     return render_template('login.html')
 
@@ -66,8 +66,7 @@ def logout():
     flash('Sesión cerrada correctamente', 'success')
     return redirect(url_for('login'))
 
-# (El resto de tu código sigue igual)
-# Rutas existentes (sin cambios en el resto, solo muestro las primeras para brevedad)
+
 @app.route('/')
 def index():
     try:
