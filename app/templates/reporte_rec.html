@@ -7,6 +7,7 @@
     <div class="card shadow-sm p-4 rounded-3">
         <h4 class="text-center mb-4 text-muted"><i class="fas fa-filter me-2"></i>Filtros de Recaudación</h4>
         <form method="GET" action="{{ url_for('reporte_recaudacion') }}" class="row g-3">
+            
             <!-- Filtrar por Cancha -->
             <div class="col-12 col-md-3">
                 <label for="cancha_id" class="form-label fw-bold text-secondary">Cancha</label>
@@ -63,7 +64,7 @@
             <div class="row mt-4 d-flex justify-content-center">
                 <div class="col-6 col-md-4">
                     <button type="submit" class="btn btn-primary w-100 shadow-sm">
-                        <i class="fas fa-search me-2"></i>Filtrar
+                        <i class="fas fa-search me-2"></i>Buscar
                     </button>
                 </div>
                 <div class="col-6 col-md-4">
@@ -76,7 +77,8 @@
     </div>
 </div>
 
-<!-- TARJETA DE RECAUDACIÓN (sin cambios, solo para contexto) -->
+<!-- Tarjeta de recaudación -->
+
 <div class="container mt-4">
     <div class="card shadow-lg p-4">
         <h2 class="text-center mb-4">💰 Reporte de Recaudación</h2>

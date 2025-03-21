@@ -8,7 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import logging
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:sarandeameelcabezudo@localhost/proyecto_cancha_2'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:876543210@localhost/proyecto_cancha_2'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'mi_clave_secreta_12345'
 
@@ -63,9 +63,9 @@ def register():
 @login_required
 def logout():
     logout_user()
-    flash('Sesión cerrada correctamente', 'success')
+    flash('Sesión cerrada correctamente', 'success')  # Solo este mensaje
     return redirect(url_for('login'))
-
+# Rutas
 
 @app.route('/')
 def index():

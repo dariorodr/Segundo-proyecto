@@ -1,29 +1,43 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <div class="card shadow-lg p-4">
-        <h2 class="text-center">✏️ Editar Cancha</h2>
+<div class="container mt-5">
+    <div class="card shadow-lg p-4 mx-auto" style="max-width: 500px;">
+        <h2 class="text-center mb-4">
+            <i class="fas fa-edit text-primary"></i> Editar Cancha
+        </h2>
 
+        <!-- Campos de editar cancha -->
         <form method="POST">
             <div class="mb-3">
-                <label for="nombre_cancha" class="form-label">Nombre de la Cancha:</label>
-                <input type="text" class="form-control" id="nombre_cancha" name="nombre_cancha" value="{{ cancha.NombreCancha }}" required>
+                <label for="nombre_cancha" class="form-label fw-bold">
+                    <i class="fas fa-futbol me-1"></i> Nombre de la Cancha
+                </label>
+                <input type="text" class="form-control rounded-3" id="nombre_cancha" name="nombre_cancha" value="{{ cancha.NombreCancha }}" required>
             </div>
 
             <div class="mb-3">
-                <label for="jugadores" class="form-label">Cantidad de Jugadores:</label>
-                <input type="text" class="form-control" id="jugadores" name="jugadores" value="{{ cancha.Jugadores }}" required>
+                <label for="jugadores" class="form-label fw-bold">
+                    <i class="fas fa-users me-1"></i> Cantidad de Jugadores
+                </label>
+                <input type="number" class="form-control rounded-3" id="jugadores" name="jugadores" value="{{ cancha.Jugadores }}" required>
             </div>
 
-            <div class="mb-3">
-                <label for="tipo" class="form-label">Tipo:</label>
-                <input type="text" class="form-control" id="tipo" name="tipo" value="{{ cancha.Tipo }}" required>
+            <div class="mb-4">
+                <label for="tipo" class="form-label fw-bold">
+                    <i class="fas fa-layer-group me-1"></i> Tipo
+                </label>
+                <input type="text" class="form-control rounded-3" id="tipo" name="tipo" value="{{ cancha.Tipo }}" required>
             </div>
 
-            <div class="text-center">
-                <button type="submit" class="btn btn-success">Guardar Cambios</button>
-                <a href="{{ url_for('gestionar_canchas') }}" class="btn btn-secondary">Cancelar</a>
+            <!-- Botones -->
+            <div class="d-flex justify-content-center gap-3">
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fas fa-save me-1"></i> Guardar Cambios
+                </button>
+                <a href="{{ url_for('gestionar_canchas') }}" class="btn btn-secondary px-4">
+                    <i class="fas fa-arrow-left me-1"></i> Cancelar
+                </a>
             </div>
         </form>
     </div>

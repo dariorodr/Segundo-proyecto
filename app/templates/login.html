@@ -10,11 +10,31 @@
             </div>
             <div class="mb-3">
                 <label for="password" class="form-label">Contraseña:</label>
-                <input type="password" name="password" id="password" class="form-control" required>
+                <div class="input-group">
+                    <input type="password" name="password" id="password" class="form-control" required>
+                    <span class="input-group-text">
+                        <i class="fas fa-eye" id="togglePassword" style="cursor: pointer;"></i>
+                    </span>
+                </div>
             </div>
             <button type="submit" class="btn btn-primary w-100">Iniciar Sesión</button>
         </form>
         <p class="text-center mt-3">¿No tienes cuenta? <a href="{{ url_for('register') }}">Regístrate</a></p>
     </div>
 </div>
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const passwordField = document.getElementById('password');
+        const icon = this;
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            passwordField.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    });
+</script>
 {% endblock %}
