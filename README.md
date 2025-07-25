@@ -20,11 +20,10 @@ App web hecha para administrar y registrar turnos de reserva de canchas de futbo
 -Javascript (alerta aevlist)
 
 
-Como ejecutarlo:
+# Cómo ejecutarlo:
 
-## Cómo ejecutarlo
 1. Clonar el repositorio.
 2. Instalar las dependencias: `pip install -r requirements.txt`.
 3. Activar el entorno virtual: venv/Scripts/activate.
-4. Ejecutá `py app/app.py`.
-5. Abrí el navegador en `http://localhost:5000`.
+4. Ejecutar `py app/app.py`.
+5. Abrir el navegador en `http://localhost:5000`.
