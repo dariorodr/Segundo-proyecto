@@ -6,11 +6,24 @@ from jinja2 import TemplateNotFound
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
+import os                          # ← NUEVO
+from dotenv import load_dotenv     # ← NUEVO
+
+# ==================== NUEVO: CARGAR VARIABLES DE ENTORNO ====================
+load_dotenv()
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:876543210@localhost/proyecto_cancha_2'
+
+# ==================== CAMBIO 1: CONFIGURACIÓN INTELIGENTE ====================
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'mi_clave_secreta_12345')
+
+# Configuración que permite tanto local como deploy
+if os.getenv('DATABASE_URL'):
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+else:
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:876543210@localhost/proyecto_cancha_2'
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'mi_clave_secreta_12345'
 
 # Configuración de logging
 logging.basicConfig(filename='error.log', level=logging.ERROR, 
@@ -26,9 +39,13 @@ from models import db, User, Turno, Precio, Cancha
 
 db.init_app(app)
 
+# ==================== CAMBIO 2: load_user actualizado ====================
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    try:
+        return db.session.get(User, int(user_id))   # ← Cambiado (mejor práctica SQLAlchemy 2.0)
+    except:
+        return None
 
 # Rutas de autenticación
 @app.route('/login', methods=['GET', 'POST'])
@@ -280,6 +297,8 @@ def eliminar_cancha(id):
         flash("Ocurrió un error inesperado.", "danger")
     return redirect(url_for('gestionar_canchas'))
 
+# ==================== CAMBIO 3: Ruta de reservar turnos (IMPORTANTE) ====================
+@app.route('/reservar-turnos', methods=['GET', 'POST'])      # ← Nueva línea
 @app.route('/reservar-turnos/', methods=['GET', 'POST'])
 def reservar_turnos_formulario():
     try:
