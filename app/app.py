@@ -659,13 +659,15 @@ def reporte_recaudacion():
         flash("Ocurrió un error inesperado. Por favor, intenta de nuevo.", "danger")
         return redirect(url_for('index'))
 
+# ==================== EJECUCIÓN PARA RAILWAY ====================
 if __name__ == '__main__':
     with app.app_context():
         try:
             db.create_all()
-            print("Base de datos inicializada correctamente")
-        except SQLAlchemyError as e:
-            app.logger.error(f"Error al inicializar la base de datos: {str(e)}")
-            print("No se pudo conectar a la base de datos. Revisa la configuración.")
-            exit(1)
-    app.run(debug=True)
+            print("✅ Base de datos inicializada correctamente")
+        except Exception as e:
+            print(f"❌ Error en BD: {e}")
+
+    port = int(os.getenv('PORT', 8080))   # Railway usa esta variable
+    print(f"🚀 Servidor corriendo en http://0.0.0.0:{port}")
+    app.run(host='0.0.0.0', port=port, debug=False)
