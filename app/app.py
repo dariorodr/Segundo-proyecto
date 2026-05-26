@@ -19,7 +19,10 @@ app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'mi_clave_secreta_12345')
 
 # Configuración que permite tanto local como deploy
 if os.getenv('DATABASE_URL'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    db_url = os.getenv('DATABASE_URL')
+    if db_url.startswith('mysql://'):
+        db_url = db_url.replace('mysql://', 'mysql+pymysql://', 1)
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_url
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:876543210@localhost/proyecto_cancha_2'
 
