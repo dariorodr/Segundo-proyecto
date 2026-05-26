@@ -12,6 +12,9 @@ from dotenv import load_dotenv     # ← NUEVO
 # ==================== NUEVO: CARGAR VARIABLES DE ENTORNO ====================
 load_dotenv()
 
+import sys
+print(f"DATABASE_URL recibida: {os.getenv('DATABASE_URL')}", file=sys.stderr)
+
 app = Flask(__name__)
 
 # ==================== CAMBIO 1: CONFIGURACIÓN INTELIGENTE ====================
