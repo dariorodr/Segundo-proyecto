@@ -660,14 +660,7 @@ def reporte_recaudacion():
         return redirect(url_for('index'))
 
 # ==================== EJECUCIÓN PARA RAILWAY ====================
+# Cambialo por:
 if __name__ == '__main__':
-    with app.app_context():
-        try:
-            db.create_all()
-            print("✅ Base de datos inicializada correctamente")
-        except Exception as e:
-            print(f"❌ Error en BD: {e}")
-
-    port = int(os.getenv('PORT', 8080))
-    print(f"🚀 Iniciando servidor en http://0.0.0.0:{port}")
-    app.run(host='0.0.0.0', port=port, debug=False)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
