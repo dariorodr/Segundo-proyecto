@@ -668,6 +668,6 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"❌ Error en BD: {e}")
 
-    port = int(os.getenv('PORT', 8080))   # Railway usa esta variable
-    print(f"🚀 Servidor corriendo en http://0.0.0.0:{port}")
+    port = int(os.getenv('PORT', 8080))
+    print(f"🚀 Iniciando servidor en http://0.0.0.0:{port}")
     app.run(host='0.0.0.0', port=port, debug=False)
