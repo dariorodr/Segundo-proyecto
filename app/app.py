@@ -6,21 +6,20 @@ from jinja2 import TemplateNotFound
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
 import logging
-import os                          # ← NUEVO
-from dotenv import load_dotenv     # ← NUEVO
+import os
+import sys
+from dotenv import load_dotenv
 
-# ==================== NUEVO: CARGAR VARIABLES DE ENTORNO ====================
+# ==================== CARGAR VARIABLES DE ENTORNO ====================
 load_dotenv()
 
-import sys
 print(f"DATABASE_URL recibida: {os.getenv('DATABASE_URL')}", file=sys.stderr)
 
 app = Flask(__name__)
 
-# ==================== CAMBIO 1: CONFIGURACIÓN INTELIGENTE ====================
+# ==================== CONFIGURACIÓN ====================
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'mi_clave_secreta_12345')
 
-# Configuración que permite tanto local como deploy
 if os.getenv('DATABASE_URL'):
     db_url = os.getenv('DATABASE_URL')
     if db_url.startswith('mysql://'):
@@ -41,10 +40,10 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Importar modelos después de inicializar db y app
+sys.path.insert(0, os.path.dirname(__file__))
 from models import db, User, Turno, Precio, Cancha
 
 db.init_app(app)
-
 # ==================== CAMBIO 2: load_user actualizado ====================
 @login_manager.user_loader
 def load_user(user_id):
