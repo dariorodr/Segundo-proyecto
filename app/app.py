@@ -41,7 +41,7 @@ login_manager.login_view = 'login'
 
 # Importar modelos después de inicializar db y app
 sys.path.insert(0, os.path.dirname(__file__))
-from models import db, User, Turno, Precio, Cancha
+from app.models import db, User, Turno, Precio, Cancha
 
 db.init_app(app)
 # ==================== CAMBIO 2: load_user actualizado ====================
