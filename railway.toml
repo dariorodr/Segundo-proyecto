@@ -1,5 +1,5 @@
 [build]
-buildCommand = "find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null; pip install -r requirements.txt"
+buildCommand = "pip install -r requirements.txt"
 
 [deploy]
-startCommand = "gunicorn --bind 0.0.0.0:$PORT --timeout 120 app.app:app"
+startCommand = "gunicorn --chdir /app/app --bind 0.0.0.0:$PORT --timeout 120 app:app"
