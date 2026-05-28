@@ -15,7 +15,7 @@ load_dotenv()
 
 print(f"DATABASE_URL recibida: {os.getenv('DATABASE_URL')}", file=sys.stderr)
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 
 # ==================== CONFIGURACIÓN ====================
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'mi_clave_secreta_12345')
