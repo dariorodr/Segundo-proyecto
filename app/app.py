@@ -44,6 +44,12 @@ sys.path.insert(0, os.path.dirname(__file__))
 from models import db, User, Turno, Precio, Cancha
 
 db.init_app(app)
+
+# Crear tablas si no existen
+with app.app_context():
+    db.create_all()
+    print("✅ Base de datos inicializada correctamente", file=sys.stderr)
+
 # ==================== CAMBIO 2: load_user actualizado ====================
 @login_manager.user_loader
 def load_user(user_id):
