@@ -99,8 +99,14 @@ def logout():
 def index():
     try:
         return render_template('index.html', title='Inicio')
+    except TemplateNotFound as e:
+        app.logger.error(f"Plantilla no encontrada en /: {str(e)}")
+        flash("Página no disponible. Contacta al administrador.", "danger")
+        return redirect(url_for('index'), code=500)
     except Exception as e:
-        return str(e), 500
+        app.logger.error(f"Error inesperado en /: {str(e)}")
+        flash("Ocurrió un error inesperado.", "danger")
+        return redirect(url_for('index'), code=500)
 
 @app.route('/turnos/')
 def turnos():
